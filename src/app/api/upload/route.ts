@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
-const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_SIZE = 4 * 1024 * 1024; // 4 MB (Vercel Free Tier limit is 4.5MB)
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 /**
  * Image Upload Controller using Vercel Blob Storage.
- * This replaces local filesystem writes (fs) for serverless compatibility.
  */
 export async function POST(req: NextRequest) {
   try {
+    console.log("Starting cloud upload process...");
+    
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -26,21 +27,22 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: "File size must be under 5 MB" },
+        { error: "File size must be under 4 MB" },
         { status: 400 }
       );
     }
 
     /* 
-     * Vercel Blob 'put' automatically handles storage, naming, 
-     * and generates a secure public URL.
+     * Explicitly passing the token to ensure it's picked up 
+     * correctly in Turbopack/Serverless environments.
      */
     const filename = file.name || `upload-${Date.now()}`;
     const blob = await put(filename, file, {
       access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN, // Explicit token detection
     });
 
-    console.log("Vercel Blob success:", blob.url);
+    console.log("Cloud upload successful:", blob.url);
 
     // Return the secure cloud URL path
     return NextResponse.json({ url: blob.url });
