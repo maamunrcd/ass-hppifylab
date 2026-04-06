@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
+import { put } from "@vercel/blob";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
+/**
+ * Image Upload Controller using Vercel Blob Storage.
+ * This replaces local filesystem writes (fs) for serverless compatibility.
+ */
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -30,22 +31,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure uploads directory exists
-    await mkdir(UPLOAD_DIR, { recursive: true });
+    /* 
+     * Vercel Blob 'put' automatically handles storage, naming, 
+     * and generates a secure public URL.
+     */
+    const blob = await put(file.name, file, {
+      access: 'public',
+    });
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${randomUUID()}.${ext}`;
-    const filepath = path.join(UPLOAD_DIR, filename);
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer);
-
-    // Return the public URL path
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    // Return the secure cloud URL path
+    return NextResponse.json({ url: blob.url });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("Vercel Blob upload error:", error);
     return NextResponse.json(
-      { error: "Upload failed" },
+      { error: "Cloud upload failed" },
       { status: 500 }
     );
   }
