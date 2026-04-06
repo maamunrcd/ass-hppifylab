@@ -35,16 +35,28 @@ export async function POST(req: NextRequest) {
      * Vercel Blob 'put' automatically handles storage, naming, 
      * and generates a secure public URL.
      */
-    const blob = await put(file.name, file, {
+    const filename = file.name || `upload-${Date.now()}`;
+    const blob = await put(filename, file, {
       access: 'public',
     });
 
+    console.log("Vercel Blob success:", blob.url);
+
     // Return the secure cloud URL path
     return NextResponse.json({ url: blob.url });
-  } catch (error) {
-    console.error("Vercel Blob upload error:", error);
+  } catch (error: any) {
+    console.error("Vercel Blob upload failed:", error?.message || error);
+    
+    // Check if the token is missing
+    if (error?.message?.includes("token")) {
+      return NextResponse.json(
+        { error: "Vercel Blob Storage is not connected. Please connect it in the Vercel Dashboard under the 'Storage' tab." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Cloud upload failed" },
+      { error: "Cloud upload failed. Check server logs." },
       { status: 500 }
     );
   }
