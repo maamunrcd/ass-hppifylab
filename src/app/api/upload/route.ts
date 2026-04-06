@@ -47,18 +47,20 @@ export async function POST(req: NextRequest) {
     // Return the secure cloud URL path
     return NextResponse.json({ url: blob.url });
   } catch (error: any) {
-    console.error("Vercel Blob upload failed:", error?.message || error);
+    const errorMsg = error?.message || String(error);
+    console.error("Vercel Blob upload failed:", errorMsg);
     
     // Check if the token is missing
-    if (error?.message?.includes("token")) {
+    if (errorMsg.toLowerCase().includes("token")) {
       return NextResponse.json(
         { error: "Vercel Blob Storage is not connected. Please connect it in the Vercel Dashboard under the 'Storage' tab." },
         { status: 500 }
       );
     }
 
+    // DEBUG: Return the actual error to the user for 1 deploy
     return NextResponse.json(
-      { error: "Cloud upload failed. Check server logs." },
+      { error: `Vercel Blob Error: ${errorMsg}` },
       { status: 500 }
     );
   }
