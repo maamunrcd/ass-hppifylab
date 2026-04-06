@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AppifySocial: Scalable & Modern Social Feed Engine
 
-## Getting Started
+AppifySocial is a production-grade social media feed built with **Next.js 16**, **TypeScript**, and **Prisma**. It transitions a static design into a fully interactive, secure, and scalable application using the latest industry standards.
 
-First, run the development server:
+## 🌟 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. High-Performance Feed
+-   **Infinite Scrolling**: Native implementation using `IntersectionObserver` for seamless content loading.
+-   **Cursor-Based Pagination**: Optimized for millions of records; avoids the performance degradation of classic offset pagination.
+-   **Optimistic UI Updates**: Reactions (Likes) and Comments feel instantaneous, using React Query's `onMutate` to eliminate network perceived latency.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Rich Content Delivery
+-   **Post Creation**: Supports rich text and image posts with client/server-side validation.
+-   **Media Handling**: Dedicated API route for secure image uploads with UUID sanitization.
+-   **Public/Private Visibility**: Database-level filtering ensures private posts are only visible to their authors.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Advanced Comment System
+-   **Nested Threading**: Supports deep reply chains using a self-referential Prisma model.
+-   **Interactive Reactions**: Like functionality on comments, precisely matched to original design assets.
+-   **Micro-Interactions**: Real-time relative timestamps and hover-active states for action links.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗 Architectural Design
 
-## Learn More
+-   **Feature-Based Folder Structure**: Organized by domain (`src/features/feed/`, `src/features/auth/`) to ensure long-term maintainability and horizontal scalability.
+-   **Solid Service Layer**: Heavy business logic is decoupled from UI components into reusable `PostService` and `CommentService` classes.
+-   **Type-Safe Server Actions**: All mutations use Next.js Server Actions with **Zod** schema validation for end-to-end type safety.
+-   **Security First**: Implements JWT-based authentication via HTTP-only cookies and bcrypt password hashing.
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1.  **Clone & Install**:
+    ```bash
+    npm install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2.  **Environment Setup**:
+    Configure your `.env` for PostgreSQL and JWT:
+    ```env
+    DATABASE_URL="postgresql://user:password@localhost:5432/appify"
+    JWT_SECRET="generate-a-secure-key"
+    ```
 
-## Deploy on Vercel
+3.  **Database Migration**:
+    ```bash
+    npx prisma migrate dev
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4.  **Run Development**:
+    ```bash
+    npm run dev
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📈 Scalability Readiness
+
+While implemented as an MVP, the system is architected for massive scale. For a deep dive into the migration path toward millions of posts (S3 storage, Redis caching, and Message Queues), please refer to our:
+
+📄 **[Architecture & Scalability Analysis](./architecture_analysis.md)**
+
+## 📁 Repository Structure
+
+-   `src/features/`: Domain-specific components, hooks, and server actions.
+-   `src/services/`: Modularized business logic (Service Layer).
+-   `src/app/api/`: REST endpoints for client-side file uploads.
+-   `lib/`: Core utilities (Prisma Client, JWT verification).
+-   `design-assets/`: Reference designs converted into React components.
+
+---
+*Created for the Infolytx Interview Task.*
