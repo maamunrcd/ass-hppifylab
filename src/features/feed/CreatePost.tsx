@@ -203,8 +203,8 @@ export default function CreatePost({
       setUploadError("Only JPEG, PNG, GIF, and WebP images are allowed.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError("Image must be under 5 MB.");
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadError("Image must be under 4 MB.");
       return;
     }
 
@@ -241,12 +241,14 @@ export default function CreatePost({
         });
         const data = await res.json();
         if (!res.ok) {
+          alert(`UPLOAD ERROR: ${data.error || "Unknown Failure"}`);
           setUploadError(data.error || "Upload failed");
           setLoading(false);
           return;
         }
         imageUrl = data.url;
-      } catch {
+      } catch (err: any) {
+        alert(`NETWORK ERROR: ${err?.message || "Failed to reach upload API"}`);
         setUploadError("Upload failed. Please try again.");
         setLoading(false);
         return;
